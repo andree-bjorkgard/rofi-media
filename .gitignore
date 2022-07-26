@@ -1,2 +1,5 @@
+.vscode
 main
 media.sh
+__debug_bin
+.start

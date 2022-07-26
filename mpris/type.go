@@ -8,7 +8,7 @@ import (
 	"github.com/godbus/dbus/v5"
 )
 
-type Track struct {
+type Media struct {
 	ID     string
 	Length time.Duration
 	ArtURL string
@@ -23,46 +23,45 @@ type Track struct {
 	URL string
 }
 
-func decodeMetadata(metadata dbus.Variant) (Track, error) {
-	t := Track{}
-	metadataMap, ok := metadata.Value().(map[string]dbus.Variant)
+func decodeMetadata(metadata any, m *Media) error {
+	metadataMap, ok := metadata.(map[string]dbus.Variant)
 	if !ok {
-		return t, fmt.Errorf("mpris.decodeMetadata: metadata is not a valid structure")
+		return fmt.Errorf("mpris.decodeMetadata: metadata is not a valid structure")
 	}
 
 	for key, val := range metadataMap {
 		switch key {
 		case "mpris:trackid":
 			if v, ok := val.Value().(string); ok {
-				t.ID = v
+				m.ID = v
 			}
 		case "mpris:length":
 			if v, ok := val.Value().(int64); ok {
-				t.Length = time.Duration(v * int64(time.Microsecond))
+				m.Length = time.Duration(v * int64(time.Microsecond))
 			}
 
 		case "mpris:artUrl":
 			if v, ok := val.Value().(string); ok {
-				t.ArtURL = v
+				m.ArtURL = v
 			}
 
 		case "xesam:album":
 			if v, ok := val.Value().(string); ok {
-				t.Album = v
+				m.Album = v
 			}
 
 		case "xesam:albumArtist":
 			if v, ok := val.Value().(string); ok {
-				t.AlbumArtist = v
+				m.AlbumArtist = v
 			}
 
 		case "xesam:artist":
 			if v, ok := val.Value().(string); ok {
-				t.Artist = v
+				m.Artist = v
 				continue
 			}
 			if v, ok := val.Value().([]string); ok {
-				t.Artist = strings.Join(v, ", ")
+				m.Artist = strings.Join(v, ", ")
 				continue
 			}
 
@@ -74,26 +73,26 @@ func decodeMetadata(metadata dbus.Variant) (Track, error) {
 		case "xesam:contentCreated":
 			if v, ok := val.Value().(string); ok {
 				if ti, err := time.Parse(time.RFC3339, v); err == nil {
-					t.Year = int8(ti.Year())
+					m.Year = int8(ti.Year())
 				}
 			}
 		case "xesam:discNumber":
 		case "xesam:firstUsed":
 		case "xesam:genre":
 			if v, ok := val.Value().([]string); ok {
-				t.Genre = strings.Join(v, ", ")
+				m.Genre = strings.Join(v, ", ")
 			}
 		case "xesam:lastUsed":
 		case "xesam:lyricist":
 		case "xesam:title":
 			if v, ok := val.Value().(string); ok {
-				t.Title = v
+				m.Title = v
 			}
 
 		case "xesam:trackNumber":
 		case "xesam:url":
 			if v, ok := val.Value().(string); ok {
-				t.URL = v
+				m.URL = v
 			}
 		case "xesam:useCount":
 		case "xesam:userRating":
@@ -101,5 +100,5 @@ func decodeMetadata(metadata dbus.Variant) (Track, error) {
 
 	}
 
-	return t, nil
+	return nil
 }
