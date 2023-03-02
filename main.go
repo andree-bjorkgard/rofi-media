@@ -121,16 +121,17 @@ func main() {
 			}
 
 		case "play":
-			if err := selected.Play(); err != nil {
-				log.Printf("Could not play (%s): %s", selected.Name, err)
-			}
-
 			for _, p := range others {
 				if p.IsPlaying() {
 					if err := p.Pause(); err != nil {
 						log.Printf("Could not play (%s): %s", p.Name, err)
 					}
 				}
+			}
+			fallthrough
+		case "playOne":
+			if err := selected.Play(); err != nil {
+				log.Printf("Could not play (%s): %s", selected.Name, err)
 			}
 
 		case "previous":
@@ -210,7 +211,7 @@ func showControls(player mpris.Player, v rofi.Value) []rofi.Option {
 	} else {
 		opts = append(opts, rofi.Option{
 			Label: "Play",
-			Cmds:  []string{"play"},
+			Cmds:  []string{"playOne"},
 			Icon:  "player_play",
 			Value: v.Value,
 		})
